@@ -59,7 +59,7 @@ def buildPaths(action, type = 'WTF'):
 
     version      = options[action][1]
     version_path = '_' + version + '_'
-    path         = directory + version_path + '/'# + type
+    path         = directory + version_path + '/'
     filename     = output + '/' + type.lower() + '-' + version + '-' + now
 
 def printBackUpNotice(action, type = 'WTF'):
