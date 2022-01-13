@@ -1,4 +1,4 @@
-import shutil
+import shutil, os.path
 from datetime import datetime
 
 global version, path, filename
@@ -59,7 +59,7 @@ def buildPaths(action, type = 'WTF'):
 
     version      = options[action][1]
     version_path = '_' + version + '_'
-    path         = directory + version_path + '/' + type
+    path         = directory + version_path + '/'# + type
     filename     = output + '/' + type.lower() + '-' + version + '-' + now
 
 def printBackUpNotice(action, type = 'WTF'):
@@ -68,7 +68,11 @@ def printBackUpNotice(action, type = 'WTF'):
 def doBackUp(action, type = 'WTF'):
     buildPaths(action, type)
     printBackUpNotice(action, type)
-    shutil.make_archive(filename, 'zip', path)
+
+    if os.path.isdir(path):
+        shutil.make_archive(filename, 'zip', path, type)
+    else:
+        print('Skipping archive because path does not exist! ' + path)
 
 def buildMenu():
     menu = []
