@@ -63,7 +63,7 @@ def buildPaths(action, type = 'WTF'):
     filename     = output + '/' + type.lower() + '-' + version + '-' + now
 
 def printBackUpNotice(action, type = 'WTF'):
-    print("Backing up " + type + " folder for " + options[action][0] + " ...")
+    print("Backing up " + type + " folder for " + options[action][0] + " ..." + filename)
 
 def doBackUp(action, type = 'WTF'):
     buildPaths(action, type)
