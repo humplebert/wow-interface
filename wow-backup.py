@@ -32,7 +32,7 @@ def doCompression(showHeader = False):
     action = input("Select Action: ")
 
     if action in options.keys():
-        if action in == 'q':
+        if action == 'q':
             quit()
 
         if action in suboptions:
