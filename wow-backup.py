@@ -19,7 +19,7 @@ def doCompression(showHeader = False):
         '3': ("TBC","classic"),
         '4': "All",
         '5': "All (w/ Interface)",
-        '6': "Quit"
+        'q': "Quit"
     }
 
     global suboptions
@@ -32,7 +32,7 @@ def doCompression(showHeader = False):
     action = input("Select Action: ")
 
     if action in options.keys():
-        if action == '6':
+        if action in == 'q':
             quit()
 
         if action in suboptions:
@@ -48,10 +48,10 @@ def doCompression(showHeader = False):
                 if doInterface == True:
                     doBackUp(v, 'Interface')
 
-        print("Backup complete!\n")
+        print("Backup complete!\n\n")
         doCompression()
     else:
-        print("Invalid Selection!")
+        print("Invalid Selection!\n\n")
         doCompression()
 
 def buildPaths(action, type = 'WTF'):
