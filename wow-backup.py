@@ -1,6 +1,20 @@
 import tarfile
 from datetime import datetime
 
+# World of Warcraft root directory
+root = '/mnt/c/Program Files (x86)/World of Warcraft/'
+
+# path to output directory
+output = '/mnt/c/Users/alane/OneDrive/Documents/WoW BackUps'
+
+# game versions
+versions = {
+    'Retail': 'retail',
+    'Vanilla': 'classic_era',
+    'TBC': 'classic'
+}
+
+# menu
 menu_options = {
     '1': 'WTF',
     '2': 'WTF & Interface',
@@ -12,7 +26,7 @@ def do_compression(show_header=False):
     if show_header:
         print("World of Warcraft Interface BackUp System\n")
 
-    build_menu()
+    render_menu()
     action = input('Select Action: ')
 
     if action in menu_options.keys():
@@ -34,16 +48,7 @@ def do_compression(show_header=False):
 
 
 def build_directory_list(folder='WTF'):
-    # path to WoW installation
-    root = '/mnt/c/Program Files (x86)/World of Warcraft/'
     paths = []
-
-    # game versions
-    versions = {
-        'Retail': 'retail',
-        'Vanilla': 'classic_era',
-        'TBC': 'classic'
-    }
 
     for label, version in versions.items():
         path = root + '_' + version + '_' + '/' + folder
@@ -59,8 +64,6 @@ def do_backup(directories):
     now = datetime.now()
     now = now.strftime("%Y%m%d%H%M%S")
 
-    # path to output directory
-    output = '/mnt/c/Users/alane/OneDrive/Documents/WoW BackUps'
     filename = output + '/' + now + '.tar.gz'
 
     with tarfile.open(filename, 'w') as archive:
@@ -80,7 +83,7 @@ def get_menu_options():
     }
 
 
-def build_menu():
+def render_menu():
     menu = []
 
     for k, v in menu_options.items():
