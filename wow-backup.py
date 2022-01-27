@@ -48,16 +48,16 @@ def do_compression(show_header=False):
 
 
 def build_directory_list(folder='WTF'):
-    paths = []
+    directories = {}
 
     for label, version in versions.items():
         path = root + '_' + version + '_' + '/' + folder
         path_rel = version + '/' + folder
-        paths.append([path, path_rel])
+        directories[path] = path_rel
 
         print('Adding ' + folder + ' folder for ' + label + ' to the archive ... ' + path)
 
-    return paths
+    return directories
 
 
 def do_backup(directories):
@@ -69,8 +69,8 @@ def do_backup(directories):
     with tarfile.open(filename, 'w') as archive:
         print('Creating archive ' + filename + ' ... ')
 
-        for directory in directories:
-            archive.add(directory[0], arcname=directory[1])
+        for path in directories:
+            archive.add(path, arcname=directories[path])
 
     archive.close()
 
