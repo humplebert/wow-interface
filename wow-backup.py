@@ -24,10 +24,11 @@ menu_options = {
     '1': 'Archive WTF',
     '2': 'Archive WTF & Interface',
     '3': 'Rename Interface',
+    '4': 'Restore Interface',
     'q': 'Quit'
 }
 
-menu_options_name = {
+menu_options_rename = {
     '1': 'Retail',
     '2': 'Vanilla',
     '3': 'TBC',
@@ -55,14 +56,14 @@ def run_manager(show_header=False):
             quit()
 
         if action == '3':
-            print(f"\n{build_menu(menu_options_name)}")
-            action = input('Select Reset Action: ')
+            print(f"\n{build_menu(menu_options_rename)}")
+            action = input('Select Rename Action: ')
 
             if action == 'q':
                 print("\n")
                 run_manager()
             
-            do_interface_rename(versions[menu_options_name[action]], debug_status)
+            do_interface_rename(versions[menu_options_rename[action]], debug_status)
             run_manager()
         
         if action == '4':
