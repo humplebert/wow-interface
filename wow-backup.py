@@ -28,11 +28,11 @@ menu_options = {
     'q': 'Quit'
 }
 
-menu_options_rename = {
+menu_options_versions = {
     '1': 'Retail',
     '2': 'Vanilla',
     '3': 'TBC',
-    'q': 'Exit Rename'
+    'q': 'Exit'
 }
 
 
@@ -42,7 +42,11 @@ def run_manager(show_header=False):
 
     debug_status = True
     debug_label = f"{Fore.GREEN}ON{Style.RESET_ALL}"
-    if input('Debug Mode? (y/n) [y] ') == 'n':
+ 
+    action = input('Debug Mode? (y/n/q) [y] ')
+    exit_program(action)
+
+    if action == 'n':
         debug_status = False
         debug_label = f"{Fore.RED}OFF{Style.RESET_ALL}"
 
@@ -52,18 +56,17 @@ def run_manager(show_header=False):
     action = input('Select Action: ')
 
     if action in menu_options.keys():
-        if action == 'q':
-            quit()
+        exit_program(action)
 
         if action == '3':
-            print(f"\n{build_menu(menu_options_rename)}")
+            print(f"\n{build_menu(menu_options_versions)}")
             action = input('Select Rename Action: ')
 
             if action == 'q':
                 print("\n")
                 run_manager()
             
-            do_interface_rename(versions[menu_options_rename[action]], debug_status)
+            do_interface_rename(versions[menu_options_versions[action]], debug_status)
             run_manager()
         
         if action == '4':
@@ -99,6 +102,10 @@ def run_manager(show_header=False):
         print("Invalid Selection!\n\n")
         run_manager()
 
+
+def exit_program(action):
+    if action == 'q':
+        quit()
 
 def do_interface_archive(directories, debug_status=True):
     filename = f"{output}/{get_datetime()}.tar.gz"
