@@ -1,4 +1,4 @@
-import tarfile, os, re
+import tarfile, os, re, shutil
 from datetime import datetime
 from os import path
 from colorama import Fore
@@ -137,12 +137,11 @@ def do_interface_rename(version, debug_status=True):
         print_summary("Create /archives directory", {path_archives})
 
         if debug_status == False:
-            print('mkdir goes here')
-            #os.mkdir(path_archives)
+            os.mkdir(path_archives)
 
     for folder in folders:
         paths = build_paths(version,folder)
-        path_new = os.path.join(path_archives, f"{filename}-{folder}")
+        path_new = os.path.join(path_archives, f"{filename}/{folder}")
 
         if os.path.exists(paths['path_folder']):
             if os.path.exists(path_new):
@@ -156,24 +155,34 @@ def do_interface_rename(version, debug_status=True):
             run_manager()
 
     if renames:
-        print_summary("Interface folders moved to archives", paths_new)
-
+        print("\nRename process initiated. This may take some time...\n")
         for k in renames:
             if debug_status == False:
-                print('rename goes here')
-                #os.rename(k,renames[k])
+                shutil.move(k,renames[k])
 
+        print_summary("Interface folders moved to archives", paths_new)
         print('Rename process complete!\n')
 
 
-def do_interface_restore(debug_status=True):
+def do_interface_restore(version,debug_status=True):
     #TODO: check if /archives folder exists for the _version_
+    path_archives = os.path.join(root,version,'archives')
+    if check_archive_path() == False:
+        print("Archives directory not found. Process aborted.\n")
+        run_manager()
+
     #TODO: print a list of folders in the /archives folder grouped by timestamp with timestamp converted to y-m-d h:ma format
     #TODO: run archive for current WTF/Interface in _version_
     #TODO: rename /archives folders to _version_ folders
     print('\nNYI! Goodbye!')
     run_manager()
 
+
+def build_path_archives(version,archives_foldername='archives'):
+    return os.path.join(root,version,archives_foldername)
+
+def check_archive_path(path_archives):
+    return os.path.exists(path_archives)
 
 def get_datetime():
     now = datetime.now()
