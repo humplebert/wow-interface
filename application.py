@@ -8,7 +8,8 @@ global debug_status
 
 # World of Warcraft root directory
 #root = '/mnt/c/Program Files (x86)/World of Warcraft/'
-root = '/mnt/d/Blizzard/World of Warcraft/'
+root = '/mnt/c/Blizzard/World of Warcraft/'
+#root = '/mnt/d/Blizzard/World of Warcraft/'
 
 # path to output directory
 output = '/mnt/c/Users/alane/OneDrive/Documents/WoW BackUps'
