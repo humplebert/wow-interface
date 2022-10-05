@@ -8,8 +8,8 @@ global debug_status
 
 # World of Warcraft root directory
 #root = '/mnt/c/Program Files (x86)/World of Warcraft/'
-root = '/mnt/c/Blizzard/World of Warcraft/'
-#root = '/mnt/d/Blizzard/World of Warcraft/'
+#root = '/mnt/c/Blizzard/World of Warcraft/'
+root = '/mnt/d/Blizzard/World of Warcraft/'
 
 # path to output directory
 output = '/mnt/c/Users/alane/OneDrive/Documents/WoW BackUps'
@@ -44,7 +44,7 @@ def run_manager(show_header=False):
 
     debug_status = True
     debug_label = f"{Fore.GREEN}ON{Style.RESET_ALL}"
- 
+
     action = input('Debug Mode? (y/n/q) [y] ')
     exit_program(action)
 
@@ -67,17 +67,17 @@ def run_manager(show_header=False):
             if action == 'q':
                 print("\n")
                 run_manager()
-            
+
             do_interface_rename(versions[menu_options_versions[action]], debug_status)
             run_manager()
-        
+
         if action == '4':
             do_interface_restore(debug_status)
 
         folders=['WTF']
         if action != '1':
             folders.append('Interface')
-        
+
         directories = {}
         directories_failed = {}
 
@@ -92,7 +92,7 @@ def run_manager(show_header=False):
 
         if directories:
             print_summary("Folders added to archive", directories)
-        
+
         if directories_failed:
             print_summary("Folders NOT added to archive (path is invalid)", directories_failed)
 
@@ -201,7 +201,7 @@ def build_menu(options):
 
     for k, v in options.items():
         menu.append(f"[{k}] {v}")
-    
+
     return "\n".join(menu)
 
 
