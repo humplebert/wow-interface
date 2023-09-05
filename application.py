@@ -9,7 +9,7 @@ global debug_status
 # World of Warcraft root directory
 #root = '/mnt/c/Program Files (x86)/World of Warcraft/'
 #root = '/mnt/c/Blizzard/World of Warcraft/'
-root = '/mnt/d/Blizzard/World of Warcraft/'
+#root = '/mnt/d/Blizzard/World of Warcraft/'
 
 # path to output directory
 output = '/mnt/c/Users/alane/OneDrive/Documents/WoW BackUps'
@@ -17,8 +17,8 @@ output = '/mnt/c/Users/alane/OneDrive/Documents/WoW BackUps'
 # game versions
 versions = {
     'Retail': '_retail_',
-    'Vanilla': '_classic_era_',
-    'TBC': '_classic_'
+    'Classic Era': '_classic_era_',
+    'Classic': '_classic_'
 }
 
 # menu
@@ -32,9 +32,9 @@ menu_options = {
 
 menu_options_versions = {
     '1': 'Retail',
-    '2': 'Vanilla',
-    '3': 'TBC',
-    'q': 'Exit'
+    '2': 'Classic Era',
+    '3': 'Classic',
+    'q': 'Quit'
 }
 
 
@@ -45,6 +45,9 @@ def run_manager(show_header=False):
     debug_status = True
     debug_label = f"{Fore.GREEN}ON{Style.RESET_ALL}"
 
+    root = rootpath()
+
+    # set Debug Mode
     action = input('Debug Mode? (y/n/q) [y] ')
     exit_program(action)
 
@@ -54,6 +57,7 @@ def run_manager(show_header=False):
 
     print(f"Debug Mode is {debug_label}\n\n")
 
+    # build menu
     print(build_menu(menu_options))
     action = input('Select Action: ')
 
@@ -68,11 +72,11 @@ def run_manager(show_header=False):
                 print("\n")
                 run_manager()
 
-            do_interface_rename(versions[menu_options_versions[action]], debug_status)
+            do_interface_rename(versions[menu_options_versions[action]], root, debug_status)
             run_manager()
 
         if action == '4':
-            do_interface_restore(debug_status)
+            do_interface_restore(debug_status, root)
 
         folders=['WTF']
         if action != '1':
@@ -83,7 +87,7 @@ def run_manager(show_header=False):
 
         for version in versions:
             for folder in folders:
-                paths = build_paths(versions[version],folder)
+                paths = build_paths(versions[version], root, folder)
 
                 if os.path.exists(paths['path_folder']):
                     directories[paths['path_folder']] = paths['path_rel']
@@ -122,8 +126,7 @@ def do_interface_archive(directories, debug_status=True):
 
         archive.close()
 
-
-def do_interface_rename(version, debug_status=True):
+def do_interface_rename(version, root, debug_status=True):
     folders = ['WTF','Interface']
     filename = get_datetime()
     renames = {}
@@ -134,7 +137,7 @@ def do_interface_rename(version, debug_status=True):
     if action:
         filename = action[:35]
 
-    path_archives = os.path.join(root,version,'archives')
+    path_archives = os.path.join(root, version, 'archives')
     if os.path.exists(path_archives) == False:
         print_summary("Create /archives directory", {path_archives})
 
@@ -142,7 +145,7 @@ def do_interface_rename(version, debug_status=True):
             os.mkdir(path_archives)
 
     for folder in folders:
-        paths = build_paths(version,folder)
+        paths = build_paths(version, root, folder)
         path_new = os.path.join(path_archives, f"{filename}/{folder}")
 
         if os.path.exists(paths['path_folder']):
@@ -160,15 +163,14 @@ def do_interface_rename(version, debug_status=True):
         print("\nRename process initiated. This may take some time...\n")
         for k in renames:
             if debug_status == False:
-                shutil.move(k,renames[k])
+                shutil.move(k, renames[k])
 
         print_summary("Interface folders moved to archives", paths_new)
         print('Rename process complete!\n')
 
-
-def do_interface_restore(version,debug_status=True):
+def do_interface_restore(version, root, debug_status=True):
     #TODO: check if /archives folder exists for the _version_
-    path_archives = os.path.join(root,version,'archives')
+    path_archives = os.path.join(root, version, 'archives')
     if check_archive_path() == False:
         print("Archives directory not found. Process aborted.\n")
         run_manager()
@@ -179,9 +181,8 @@ def do_interface_restore(version,debug_status=True):
     print('\nNYI! Goodbye!')
     run_manager()
 
-
-def build_path_archives(version,archives_foldername='archives'):
-    return os.path.join(root,version,archives_foldername)
+def build_path_archives(version, root, archives_foldername='archives'):
+    return os.path.join(root, version, archives_foldername)
 
 def check_archive_path(path_archives):
     return os.path.exists(path_archives)
@@ -190,11 +191,9 @@ def get_datetime():
     now = datetime.now()
     return now.strftime("%Y%m%d%H%M%S")
 
-
 def print_summary(header,collection):
     merged_collection = "\n    ".join(collection)
     print(f"{header}:\n    {merged_collection}")
-
 
 def build_menu(options):
     menu = []
@@ -204,8 +203,7 @@ def build_menu(options):
 
     return "\n".join(menu)
 
-
-def build_paths(version, folder='WTF'):
+def build_paths(version, root, folder='WTF'):
     path_version = os.path.join(root,version)
     path_folder = os.path.join(path_version, folder)
     path_rel = f"{version}/{folder}"
@@ -215,5 +213,37 @@ def build_paths(version, folder='WTF'):
         'path_folder': path_folder,
         'path_rel': path_rel
     }
+
+def check_rootpath():
+    return os.path.exists('rootpath.txt')
+
+def read_rootpath():
+    if check_rootpath():
+        with open('rootpath.txt', 'r') as f:
+            contents = f.read()
+
+    return contents
+
+def rootpath():
+    root_path_options = {
+        '1': '/mnt/c/Program Files (x86)/World of Warcraft/',
+        '2': '/mnt/c/Blizzard/World of Warcraft/',
+        '3': '/mnt/d/Blizzard/World of Warcraft/',
+        'q': 'Quit'
+    }
+
+    # read rootpath.txt
+    if check_rootpath() == False:
+        print(f'Select path to World of Warcraft root directory... ')
+        print(build_menu(root_path_options))
+        action = input('Select Path: ')
+        exit_program(action)
+        rootpath = open('rootpath.txt', 'w')
+        rootpath.write(root_path_options[action])
+
+    root = read_rootpath()
+    print(f"Current Root Path: {Fore.YELLOW}{root}{Style.RESET_ALL}")
+
+    return root
 
 run_manager(True)
