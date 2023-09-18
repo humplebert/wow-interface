@@ -22,34 +22,34 @@ versions = {
 
 # menu
 menu_options = {
-    '1': 'Archive WTF',
-    '2': 'Archive WTF & Interface',
-    '3': 'Rename Interface',
-    '4': 'Restore Interface',
-    'p': 'Update Paths',
-    'q': 'Quit'
-}
-
-menu_options_versions = {
-    '1': 'Retail',
-    '2': 'Classic Era',
-    '3': 'Classic',
-    'q': 'Quit'
-}
-
-menu_options_path_wow_root = {
-    '1': '/mnt/c/Program Files (x86)/World of Warcraft/',
-    '2': '/mnt/c/Blizzard/World of Warcraft/',
-    '3': '/mnt/d/Blizzard/World of Warcraft/',
-    'o': 'Other (manually define)',
-    'q': 'Quit'
-}
-
-menu_options_path_output = {
-    '1': '/mnt/d/My Drive/Applications/WoW BackUps',
-    '2': '/mnt/c/Users/alane/OneDrive/Documents/WoW BackUps',
-    'o': 'Other (manually define)',
-    'q': 'Quit'
+    'core': {
+        '1': 'Archive WTF',
+        '2': 'Archive WTF & Interface',
+        '3': 'Rename Interface',
+        '4': 'Restore Interface',
+        'p': 'Update Paths',
+        'q': 'Quit'
+    },
+    'versions': {
+        '1': 'Retail',
+        '2': 'Classic Era',
+        '3': 'Classic',
+        'q': 'Quit'
+    },
+    'path_wow_root': {
+        '1': '/mnt/c/Program Files (x86)/World of Warcraft/',
+        '2': '/mnt/c/Blizzard/World of Warcraft/',
+        '3': '/mnt/d/Blizzard/World of Warcraft/',
+        'o': 'Other (manually define)',
+        'q': 'Quit'
+    },
+    'path_output': {
+        '1': '/mnt/c/Program Files (x86)/World of Warcraft/',
+        '2': '/mnt/c/Blizzard/World of Warcraft/',
+        '3': '/mnt/d/Blizzard/World of Warcraft/',
+        'o': 'Other (manually define)',
+        'q': 'Quit'
+    }
 }
 
 def run_manager(show_header=False):
@@ -62,11 +62,11 @@ def run_manager(show_header=False):
     debug_label = f"{Fore.GREEN}ON{Style.RESET_ALL}"
 
     if not bool(get_configuration('path_wow_root')):
-        set_path(menu_options_path_wow_root, 'Select path to World of Warcraft root directory... ', 'path_wow_root')
+        set_path(menu_options['path_wow_root'], 'Select path to World of Warcraft root directory... ', 'path_wow_root')
         run_manager(True)
 
     if not bool(get_configuration('path_output')):
-        set_path(menu_options_path_output, 'Select path to WoW BackUps output directory... ', 'path_output')
+        set_path(menu_options['path_output'], 'Select path to WoW BackUps output directory... ', 'path_output')
         run_manager(True)
 
     path_wow_root = get_configuration('path_wow_root')
@@ -82,26 +82,26 @@ def run_manager(show_header=False):
     print(f"Debug Mode is {debug_label}\n\n")
 
     # build menu
-    print(build_menu(menu_options))
+    print(build_menu(menu_options['core']))
     action = input('Select Action: ')
 
-    if action in menu_options.keys():
+    if action in menu_options['core'].keys():
         exit_program(action)
 
         if action == 'p':
-            set_path(menu_options_path_wow_root, 'Select path to World of Warcraft root directory... ', 'path_wow_root')
-            set_path(menu_options_path_output, 'Select path to WoW BackUps output directory... ', 'path_output')
+            set_path(menu_options['path_wow_root'], 'Select path to World of Warcraft root directory... ', 'path_wow_root')
+            set_path(menu_options['path_output'], 'Select path to WoW BackUps output directory... ', 'path_output')
             run_manager(True)
 
         if action == '3':
-            print(f"\n{build_menu(menu_options_versions)}")
+            print(f"\n{build_menu(menu_options['versions'])}")
             action = input('Select Rename Action: ')
 
             if action == 'q':
                 print("\n")
                 run_manager()
 
-            do_interface_rename(versions[menu_options_versions[action]], path_wow_root, debug_status)
+            do_interface_rename(versions[menu_options['versions'][action]], path_wow_root, debug_status)
             run_manager()
 
         if action == '4':
