@@ -6,14 +6,6 @@ from colorama import Style
 
 global debug_status
 
-# World of Warcraft root directory
-#root = '/mnt/c/Program Files (x86)/World of Warcraft/'
-#root = '/mnt/c/Blizzard/World of Warcraft/'
-#root = '/mnt/d/Blizzard/World of Warcraft/'
-
-# path to output directory
-# path_output = '/mnt/c/Users/alane/OneDrive/Documents/WoW BackUps'
-# path_output = '/mnt/d/My Drive/Applications/WoW BackUps'
 path_configuration = '/home/humplebert/wowi-configuration.json'
 
 template_configuration = {
