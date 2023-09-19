@@ -1,6 +1,7 @@
 import tarfile, os, re, shutil, json
 from datetime import datetime
-from os import path
+# from os import path, system, name
+import os
 from colorama import Fore
 from colorama import Style
 
@@ -52,7 +53,7 @@ menu_options = {
     }
 }
 
-def run_manager(show_header=False):
+def run_manager(show_header=True):
     if show_header:
         print("World of Warcraft Interface Management System")
         print_configuration('path_wow_root','Current Root Path')
