@@ -53,11 +53,13 @@ menu_options = {
     }
 }
 
-def run_manager(show_header=True):
-    if show_header:
-        print("World of Warcraft Interface Management System")
-        print_configuration('path_wow_root','Current Root Path')
-        print_configuration('path_output','Current BackUp Path')
+def run_manager(add_space=True):
+    if add_space:
+        print("\n")
+
+    print("World of Warcraft Interface Management System")
+    print_configuration('path_wow_root','Current Root Path')
+    print_configuration('path_output','Current BackUp Path')
 
     debug_status = True
     debug_label = f"{Fore.GREEN}ON{Style.RESET_ALL}"
@@ -159,9 +161,9 @@ def do_interface_archive(directories, debug_status=True):
         archive.close()
 
     time_end = timer()
-    output_time_execution(time_start, time_end)
+    print_time_execution(time_start, time_end)
 
-def output_time_execution(time_start, time_end):
+def print_time_execution(time_start, time_end):
     print(f"Total Execution Time: {Fore.YELLOW}{timedelta(seconds=time_end-time_start)}{Style.RESET_ALL}")
 
 def do_interface_rename(version, root, debug_status=True):
@@ -175,6 +177,7 @@ def do_interface_rename(version, root, debug_status=True):
     if action:
         filename = action[:35]
 
+    timer_start = timer()
     path_archives = os.path.join(root, version, 'archives')
     if os.path.exists(path_archives) == False:
         print_summary("Create /archives directory", {path_archives})
@@ -188,13 +191,15 @@ def do_interface_rename(version, root, debug_status=True):
 
         if os.path.exists(paths['path_folder']):
             if os.path.exists(path_new):
-                print(f"Could not rename {paths['path_rel']} to {path_new} because the folder already exists. Process aborted.\n")
+                print_message_error("Could not rename {paths['path_rel']} to {path_new} because the folder already exists.")
+                print_message_abort()
                 run_manager()
             else:
                 renames[paths['path_folder']] = path_new
                 paths_new.append(path_new)
         else:
-            print(f"Could not rename {paths['path_rel']} because the path to the folder was invalid! Process aborted.\n")
+            print_message_error("Could not rename {paths['path_rel']} because the path to the folder was invalid!")
+            print_message_abort()
             run_manager()
 
     if renames:
@@ -204,7 +209,10 @@ def do_interface_rename(version, root, debug_status=True):
                 shutil.move(k, renames[k])
 
         print_summary("Interface folders moved to archives", paths_new)
-        print('Rename process complete!\n')
+        print(f"{Fore.GREEN}Rename process complete!{Style.RESET_ALL}")
+
+    timer_end = timer()
+    print_time_execution(timer_start, timer_end)
 
 def do_interface_restore(version, root, debug_status=True):
     #TODO: check if /archives folder exists for the _version_
@@ -284,6 +292,12 @@ def get_configuration(configuration_key='ALL'):
 def print_configuration(configuration_key, label):
     print(f"{label}: {Fore.YELLOW}{get_configuration(configuration_key)}{Style.RESET_ALL}")
 
+def print_message_error(message):
+    print(f"{Fore.RED}{message}{Style.RESET_ALL}")
+
+def print_message_abort(message="Process aborted!"):
+    print_message_error(message)
+
 def set_path(menu_options, menu_prompt, configuration_key):
     check_path_configuration()
     configuration = get_configuration()
@@ -306,4 +320,4 @@ def set_path(menu_options, menu_prompt, configuration_key):
         configuration[configuration_key] = path_value
         write_configuration_file(configuration)
 
-run_manager(True)
+run_manager(False)
