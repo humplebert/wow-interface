@@ -1,7 +1,7 @@
 import tarfile, os, re, shutil, json
-from datetime import datetime
-# from os import path, system, name
-import os
+import os, time
+from datetime import datetime, timedelta
+from timeit import default_timer as timer
 from colorama import Fore
 from colorama import Style
 
@@ -147,6 +147,7 @@ def do_interface_archive(directories, debug_status=True):
     path_output = get_configuration('path_output')
     filename = f"{path_output}/{get_datetime()}.tar.gz"
     print(f"Creating archive {Fore.CYAN}{filename}{Style.RESET_ALL} ...")
+    time_start = timer()
 
     if debug_status == False:
         with tarfile.open(filename, 'w') as archive:
@@ -156,6 +157,12 @@ def do_interface_archive(directories, debug_status=True):
                     archive.add(value, arcname=directories[value])
 
         archive.close()
+
+    time_end = timer()
+    output_time_execution(time_start, time_end)
+
+def output_time_execution(time_start, time_end):
+    print(f"Total Execution Time: {Fore.YELLOW}{timedelta(seconds=time_end-time_start)}{Style.RESET_ALL}")
 
 def do_interface_rename(version, root, debug_status=True):
     folders = ['WTF','Interface']
