@@ -22,7 +22,12 @@ versions = {
 }
 
 # menu
-menu_options = {
+menus = {
+    'debug': {
+        'y': 'Yes',
+        'n': 'No',
+        'q': 'Quit'
+    },
     'core': {
         '1': 'Archive WTF',
         '2': 'Archive WTF & Interface',
@@ -45,16 +50,35 @@ menu_options = {
         'q': 'Quit'
     },
     'path_output': {
-        '1': '/mnt/c/Program Files (x86)/World of Warcraft/',
-        '2': '/mnt/c/Blizzard/World of Warcraft/',
-        '3': '/mnt/d/Blizzard/World of Warcraft/',
+        '1': '/mnt/d/My Drive/Applications/WoW BackUps',
         'o': 'Other (manually define)',
         'q': 'Quit'
     }
 }
 
-def get_keys_menu_options(menu_option):
+def get_menu(menu):
+    return menus[menu]
+
+def get_menu_keys(menu):
+    return menus[menu].keys()
+
+def get_keys_menus(menu_option):
     return 'foo'
+
+def set_debug_status():
+    debug_status = True
+    debug_label = f"{Fore.GREEN}ON{Style.RESET_ALL}"
+
+    action = input('Debug Mode? (y/n/q) [y] ')
+    validate_action(action, 'debug', 'y')
+
+    if action == 'n':
+        debug_status = False
+        debug_label = f"{Fore.RED}OFF{Style.RESET_ALL}"
+
+    print(f"Debug Mode is {debug_label}\n\n")
+
+    return debug_status
 
 def run_manager(add_space=True):
     if add_space:
@@ -64,101 +88,77 @@ def run_manager(add_space=True):
     print_configuration('path_wow_root','Current Root Path')
     print_configuration('path_output','Current BackUp Path')
 
-    debug_status = True
-    debug_label = f"{Fore.GREEN}ON{Style.RESET_ALL}"
-
     if not bool(get_configuration('path_wow_root')):
-        set_path(menu_options['path_wow_root'], 'Select path to World of Warcraft root directory... ', 'path_wow_root')
-        run_manager(True)
+        set_path(get_menu('path_wow_root'), 'Select path to World of Warcraft root directory... ', 'path_wow_root')
+        run_manager()
 
     if not bool(get_configuration('path_output')):
-        set_path(menu_options['path_output'], 'Select path to WoW BackUps output directory... ', 'path_output')
-        run_manager(True)
+        set_path(get_menu('path_output'), 'Select path to WoW BackUps output directory... ', 'path_output')
+        run_manager()
 
     path_wow_root = get_configuration('path_wow_root')
-
-    # set Debug Mode
-    action = input('Debug Mode? (y/n/q) [y] ')
-    validate_action(action, 'y')
-
-    if action == 'n':
-        debug_status = False
-        debug_label = f"{Fore.RED}OFF{Style.RESET_ALL}"
-
-    print(f"Debug Mode is {debug_label}\n\n")
+    debug_status = set_debug_status()
 
     # build menu
-    print(build_menu(menu_options['core']))
+    print(build_menu(get_menu('core')))
     action = input('Select Action: ')
-    validate_action(action)
+    validate_action(action, 'core')
 
-    if action in menu_options['core'].keys():
-        validate_action(action)
-
-        if action == 'p':
-            set_path(menu_options['path_wow_root'], 'Select path to World of Warcraft root directory... ', 'path_wow_root')
-            set_path(menu_options['path_output'], 'Select path to WoW BackUps output directory... ', 'path_output')
-            run_manager(True)
-
-        if action == '3':
-            print(f"\n{build_menu(menu_options['versions'])}")
-            action = input('Select Rename Action: ')
-
-            if action == 'q':
-                print("\n")
-                run_manager()
-
-            do_interface_rename(versions[menu_options['versions'][action]], path_wow_root, debug_status)
+    match action:
+        case 'p':
+            set_path('path_wow_root', 'Select path to World of Warcraft root directory... ')
+            set_path('path_output', 'Select path to WoW BackUps output directory... ')
             run_manager()
 
-        if action == '4':
+        case '3':
+            print(f"\n{build_menu(get_menu('versions'))}")
+            action = input('Select Rename Action: ')
+            validate_action(action,'versions')
+
+            do_interface_rename(versions[menus['versions'][action]], path_wow_root, debug_status)
+            run_manager()
+
+        case '4':
             do_interface_restore(debug_status, path_wow_root)
+            run_manager()
 
-        folders=['WTF']
-        if action != '1':
-            folders.append('Interface')
+        case _:
+            folders=['WTF']
+            if action != '1':
+                folders.append('Interface')
 
-        directories = {}
-        directories_failed = {}
+            directories = {}
+            directories_failed = {}
 
-        for version in versions:
-            for folder in folders:
-                paths = build_paths(versions[version], path_wow_root, folder)
+            for version in versions:
+                for folder in folders:
+                    paths = build_paths(versions[version], path_wow_root, folder)
 
-                if os.path.exists(paths['path_folder']):
-                    directories[paths['path_folder']] = paths['path_rel']
-                else:
-                    directories_failed.append(paths['path_folder'])
+                    if os.path.exists(paths['path_folder']):
+                        directories[paths['path_folder']] = paths['path_rel']
+                    else:
+                        directories_failed.append(paths['path_folder'])
 
-        if directories:
-            print_summary("Folders added to archive", directories)
+            if directories:
+                print_summary("Folders added to archive", directories)
 
-        if directories_failed:
-            print_summary("Folders NOT added to archive (path is invalid)", directories_failed)
+            if directories_failed:
+                print_summary("Folders NOT added to archive (path is invalid)", directories_failed)
 
-        do_interface_archive(directories, debug_status)
+            do_interface_archive(directories, debug_status)
 
-        print(f"{Fore.GREEN}Backup complete!{Style.RESET_ALL}\n\n")
-        run_manager()
-    else:
-        print(f"{Fore.RED}Invalid Selection!{Style.RESET_ALL}\n\n")
-        run_manager()
+            print(f"{Fore.GREEN}Backup complete!{Style.RESET_ALL}\n\n")
+            run_manager()
 
-
-def validate_action(action, default='', options={}):
+def validate_action(action, menu, default='q'):
     if 'q' == action:
         quit()
 
     if '' == action and '' != default:
         return default
 
-    if not action in options:
+    if not action in get_menu_keys(menu):
         print_message_error("Invalid Selection. Zero Tolerance for Errors. Process terminated.")
-        quit()
-
-# TODO: refactor to validate submitted input (action), check for "q" to quit, and accept a default value if empty
-def exit_program(action):
-    if action == 'q':
         quit()
 
 def do_interface_archive(directories, debug_status=True):
@@ -169,7 +169,6 @@ def do_interface_archive(directories, debug_status=True):
 
     if debug_status == False:
         with tarfile.open(filename, 'w') as archive:
-
             for value in directories:
                 if os.path.exists(value):
                     archive.add(value, arcname=directories[value])
@@ -241,7 +240,6 @@ def do_interface_restore(version, root, debug_status=True):
     #TODO: run archive for current WTF/Interface in _version_
     #TODO: rename /archives folders to _version_ folders
     print('\nNYI! Goodbye!')
-    run_manager()
 
 def build_path_archives(version, root, archives_foldername='archives'):
     return os.path.join(root, version, archives_foldername)
@@ -314,24 +312,25 @@ def print_message_error(message):
 def print_message_abort(message="Process aborted!"):
     print_message_error(message)
 
-def set_path(menu_options, menu_prompt, configuration_key):
+def set_path(configuration_key, menu_prompt):
     check_path_configuration()
     configuration = get_configuration()
 
+    menu = get_menu(configuration_key)
+
     print(f"{menu_prompt}")
-    print(build_menu(menu_options))
+    print(build_menu(menu))
     action = input('Select Option: ')
-    exit_program(action)
-    # TODO: need to add a check for valid options
+    validate_action(action, configuration_key)
 
     if 'o' == action:
         path_value = input('Enter Full Path: ')
     else:
-        path_value = menu_options[action]
+        path_value = menu[action]
 
     if not bool(os.path.exists(path_value)):
         print(f"{Fore.RED}Path '{path_value}' is INVALID!{Style.RESET_ALL}")
-        set_path(menu_options, menu_prompt, configuration_key)
+        set_path(configuration_key, menu_prompt)
     else:
         print(f"{Fore.GREEN}Path is VALID!{Style.RESET_ALL}")
         configuration[configuration_key] = path_value
