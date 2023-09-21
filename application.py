@@ -53,6 +53,9 @@ menu_options = {
     }
 }
 
+def get_keys_menu_options(menu_option):
+    return 'foo'
+
 def run_manager(add_space=True):
     if add_space:
         print("\n")
@@ -76,7 +79,7 @@ def run_manager(add_space=True):
 
     # set Debug Mode
     action = input('Debug Mode? (y/n/q) [y] ')
-    exit_program(action)
+    validate_action(action, 'y')
 
     if action == 'n':
         debug_status = False
@@ -87,9 +90,10 @@ def run_manager(add_space=True):
     # build menu
     print(build_menu(menu_options['core']))
     action = input('Select Action: ')
+    validate_action(action)
 
     if action in menu_options['core'].keys():
-        exit_program(action)
+        validate_action(action)
 
         if action == 'p':
             set_path(menu_options['path_wow_root'], 'Select path to World of Warcraft root directory... ', 'path_wow_root')
@@ -141,6 +145,18 @@ def run_manager(add_space=True):
         run_manager()
 
 
+def validate_action(action, default='', options={}):
+    if 'q' == action:
+        quit()
+
+    if '' == action and '' != default:
+        return default
+
+    if not action in options:
+        print_message_error("Invalid Selection. Zero Tolerance for Errors. Process terminated.")
+        quit()
+
+# TODO: refactor to validate submitted input (action), check for "q" to quit, and accept a default value if empty
 def exit_program(action):
     if action == 'q':
         quit()
@@ -306,6 +322,7 @@ def set_path(menu_options, menu_prompt, configuration_key):
     print(build_menu(menu_options))
     action = input('Select Option: ')
     exit_program(action)
+    # TODO: need to add a check for valid options
 
     if 'o' == action:
         path_value = input('Enter Full Path: ')
