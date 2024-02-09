@@ -250,7 +250,7 @@ def check_archive_path(path_archives):
 
 def get_datetime():
     now = datetime.now()
-    return now.strftime("%Y%m%d%H%M%S")
+    return now.strftime("%Y%m%d.%H%M%S")
 
 def print_summary(header,collection):
     merged_collection = "\n    ".join(collection)
