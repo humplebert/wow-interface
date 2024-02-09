@@ -50,7 +50,8 @@ menus = {
         'q': 'Quit'
     },
     'path_output': {
-        '1': '/mnt/d/My Drive/Applications/WoW BackUps',
+        '1': '/home/humplebert',
+        '2': '/mnt/d/My Drive/Applications/WoW BackUps',
         'o': 'Other (manually define)',
         'q': 'Quit'
     }
@@ -89,11 +90,11 @@ def run_manager(add_space=True):
     print_configuration('path_output','Current BackUp Path')
 
     if not bool(get_configuration('path_wow_root')):
-        set_path(get_menu('path_wow_root'), 'Select path to World of Warcraft root directory... ', 'path_wow_root')
+        set_path('path_wow_root', 'Select path to World of Warcraft root directory...')
         run_manager()
 
     if not bool(get_configuration('path_output')):
-        set_path(get_menu('path_output'), 'Select path to WoW BackUps output directory... ', 'path_output')
+        set_path('path_output', 'Select path to WoW BackUps output directory...')
         run_manager()
 
     path_wow_root = get_configuration('path_wow_root')
@@ -106,8 +107,8 @@ def run_manager(add_space=True):
 
     match action:
         case 'p':
-            set_path('path_wow_root', 'Select path to World of Warcraft root directory... ')
-            set_path('path_output', 'Select path to WoW BackUps output directory... ')
+            set_path('path_wow_root', 'Select path to World of Warcraft root directory...')
+            set_path('path_output', 'Select path to WoW BackUps output directory.. ')
             run_manager()
 
         case '3':
