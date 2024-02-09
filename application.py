@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from timeit import default_timer as timer
 from colorama import Fore
 from colorama import Style
+from rclone_python import rclone
 
 global debug_status
 
@@ -12,6 +13,7 @@ path_configuration = '/home/humplebert/wowi-configuration.json'
 template_configuration = {
     'path_wow_root': '',
     'path_output': '',
+    'remote_upload': ''
 }
 
 # game versions
@@ -31,9 +33,9 @@ menus = {
     'core': {
         '1': 'Archive WTF',
         '2': 'Archive WTF & Interface',
-        '3': 'Rename Interface',
-        '4': 'Restore Interface',
-        'p': 'Update Paths',
+#        '3': 'Rename Interface',
+#        '4': 'Restore Interface',
+        'u': 'Update Configuration',
         'q': 'Quit'
     },
     'versions': {
@@ -50,9 +52,13 @@ menus = {
         'q': 'Quit'
     },
     'path_output': {
-        '1': '/home/humplebert',
-        '2': '/mnt/d/My Drive/Applications/WoW BackUps',
+        '1': 'onedrive:Files/Applications/WoW Backups',
         'o': 'Other (manually define)',
+        'q': 'Quit'
+    },
+    'remote_upload': {
+        'y': 'Yes',
+        'n': 'No',
         'q': 'Quit'
     }
 }
@@ -87,14 +93,15 @@ def run_manager(add_space=True):
 
     print("World of Warcraft Interface Management System")
     print_configuration('path_wow_root','Current Root Path')
-    print_configuration('path_output','Current BackUp Path')
+    print_configuration('path_output','Current rClone BackUp Path')
+    print_configuration('remote_upload','Remote Upload Enabled')
 
     if not bool(get_configuration('path_wow_root')):
         set_path('path_wow_root', 'Select path to World of Warcraft root directory...')
         run_manager()
 
     if not bool(get_configuration('path_output')):
-        set_path('path_output', 'Select path to WoW BackUps output directory...')
+        set_path('path_output', 'Select path to rClone output directory...', False)
         run_manager()
 
     path_wow_root = get_configuration('path_wow_root')
@@ -106,9 +113,10 @@ def run_manager(add_space=True):
     validate_action(action, 'core')
 
     match action:
-        case 'p':
+        case 'u':
             set_path('path_wow_root', 'Select path to World of Warcraft root directory...')
-            set_path('path_output', 'Select path to WoW BackUps output directory.. ')
+            set_path('path_output', 'Select path to rClone output directory...', False)
+            update_configuration('remote_upload','Enable remote upload using rclone?')
             run_manager()
 
         case '3':
@@ -164,17 +172,35 @@ def validate_action(action, menu, default='q'):
 
 def do_interface_archive(directories, debug_status=True):
     path_output = get_configuration('path_output')
-    filename = f"{path_output}/{get_datetime()}.tar.gz"
+    remote_upload = get_configuration('remote_upload')
+    filename = f"{get_datetime()}.tar.gz"
     print(f"Creating archive {Fore.CYAN}{filename}{Style.RESET_ALL} ...")
     time_start = timer()
 
     if debug_status == False:
-        with tarfile.open(filename, 'w') as archive:
-            for value in directories:
-                if os.path.exists(value):
-                    archive.add(value, arcname=directories[value])
+        try:
+            with tarfile.open(filename, 'w') as archive:
+                for value in directories:
+                    if os.path.exists(value):
+                        archive.add(value, arcname=directories[value])
 
-        archive.close()
+            archive.close()
+        except:
+            print_message_error("Failed to create archive file: {filename}")
+            run_manager()
+
+        if remote_upload == 'Yes':
+            try:
+                rclone.copy(filename, path_output)
+            except:
+                print_message_error("Failed to execute rclone upload.")
+                run_manager()
+
+            try:
+                os.remove(filename)
+            except:
+                print_message_error("Failed to delete file: {filename}")
+                run_manager()
 
     time_end = timer()
     print_time_execution(time_start, time_end)
@@ -313,8 +339,10 @@ def print_message_error(message):
 def print_message_abort(message="Process aborted!"):
     print_message_error(message)
 
-def set_path(configuration_key, menu_prompt):
-    check_path_configuration()
+def set_path(configuration_key, menu_prompt, check_path=True):
+    if check_path:
+        check_path_configuration()
+
     configuration = get_configuration()
 
     menu = get_menu(configuration_key)
@@ -329,12 +357,26 @@ def set_path(configuration_key, menu_prompt):
     else:
         path_value = menu[action]
 
-    if not bool(os.path.exists(path_value)):
+    if check_path and not bool(os.path.exists(path_value)):
         print(f"{Fore.RED}Path '{path_value}' is INVALID!{Style.RESET_ALL}")
         set_path(configuration_key, menu_prompt)
     else:
         print(f"{Fore.GREEN}Path is VALID!{Style.RESET_ALL}")
         configuration[configuration_key] = path_value
         write_configuration_file(configuration)
+
+def update_configuration(configuration_key, menu_prompt):
+    configuration = get_configuration()
+
+    menu = get_menu(configuration_key)
+
+    print(f"{menu_prompt}")
+    print(build_menu(menu))
+    action = input('Select Option: ')
+    validate_action(action, configuration_key)
+
+    path_value = menu[action]
+    configuration[configuration_key] = path_value
+    write_configuration_file(configuration)
 
 run_manager(False)
