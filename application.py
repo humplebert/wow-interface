@@ -13,7 +13,8 @@ path_configuration = '/home/humplebert/wowi-configuration.json'
 template_configuration = {
     'path_wow_root': '',
     'path_output': '',
-    'remote_upload': ''
+    'remote_upload': '',
+    'debug_mode': ''
 }
 
 # game versions
@@ -23,9 +24,8 @@ versions = {
     'Classic': '_classic_'
 }
 
-# menu
 menus = {
-    'debug': {
+    'debug_mode': {
         'y': 'Yes',
         'n': 'No',
         'q': 'Quit'
@@ -63,64 +63,58 @@ menus = {
     }
 }
 
+label_title = 'World of Warcraft Interface Management System'
+prompt_path_wow_root = 'Select path to World of Warcraft root directory...'
+prompt_path_output = 'Select path to rClone output directory...'
+prompt_remote_upload = 'Enable remote upload using rclone?'
+prompt_debug_mode = 'Enable debug mode?'
+
 def get_menu(menu):
     return menus[menu]
 
 def get_menu_keys(menu):
     return menus[menu].keys()
 
-def get_keys_menus(menu_option):
-    return 'foo'
+def get_debug_status():
+    return 'Yes' == get_configuration('debug_mode')
 
-def set_debug_status():
-    debug_status = True
-    debug_label = f"{Fore.GREEN}ON{Style.RESET_ALL}"
-
-    action = input('Debug Mode? (y/n/q) [y] ')
-    validate_action(action, 'debug', 'y')
-
-    if action == 'n':
-        debug_status = False
-        debug_label = f"{Fore.RED}OFF{Style.RESET_ALL}"
-
-    print(f"Debug Mode is {debug_label}\n\n")
-
-    return debug_status
-
-def run_manager(add_space=True):
-    if add_space:
-        print("\n")
-
-    print("World of Warcraft Interface Management System")
+def run_manager():
+    print(label_title)
     print_configuration('path_wow_root','Current Root Path')
     print_configuration('path_output','Current rClone BackUp Path')
     print_configuration('remote_upload','Remote Upload Enabled')
+    print_configuration('debug_mode','Debug Mode Enabled')
 
     if not bool(get_configuration('path_wow_root')):
-        set_path('path_wow_root', 'Select path to World of Warcraft root directory...')
+        set_path('path_wow_root', prompt_path_wow_root)
         run_manager()
 
     if not bool(get_configuration('path_output')):
-        set_path('path_output', 'Select path to rClone output directory...', False)
+        update_configuration('path_output', prompt_path_output)
         run_manager()
 
     if not bool(get_configuration('remote_upload')):
-        update_configuration('remote_upload','Enable remote upload using rclone?')
+        update_configuration('remote_upload', prompt_remote_upload)
+        run_manager()
+
+    if not bool(get_configuration('debug_mode')):
+        update_configuration('debug_mode', prompt_debug_mode)
         run_manager()
 
     path_wow_root = get_configuration('path_wow_root')
-    debug_status = set_debug_status()
+    debug_status = get_debug_status()
 
     # build menu
     print(build_menu(get_menu('core')))
-    action = input('Select Action: ')
+    action = input('Select Action [q]: ')
     validate_action(action, 'core')
 
     match action:
         case 'u':
-            set_path('path_wow_root', 'Select path to World of Warcraft root directory...')
-            set_path('path_output', 'Select path to rClone output directory...', False)
-            update_configuration('remote_upload','Enable remote upload using rclone?')
+            set_path('path_wow_root', prompt_path_wow_root)
+            update_configuration('path_output', prompt_path_output)
+            update_configuration('remote_upload', prompt_remote_upload)
+            update_configuration('debug_mode', prompt_debug_mode)
             run_manager()
 
         case '3':
@@ -164,7 +158,7 @@ def run_manager(add_space=True):
             run_manager()
 
 def validate_action(action, menu, default='q'):
-    if 'q' == action:
+    if 'q' == action or '' == action:
         quit()
 
     if '' == action and '' != default:
@@ -290,7 +284,7 @@ def build_menu(options):
     menu = []
 
     for k, v in options.items():
-        menu.append(f"[{k}] {v}")
+        menu.append(f"({k}) {v}")
 
     return "\n".join(menu)
 
@@ -343,6 +337,14 @@ def print_message_error(message):
 def print_message_abort(message="Process aborted!"):
     print_message_error(message)
 
+def set_path_value(action, menu):
+    if 'o' == action:
+        path_value = input('Enter Full Path: ')
+    else:
+        path_value = menu[action]
+
+    return path_value
+
 def set_path(configuration_key, menu_prompt, check_path=True):
     if check_path:
         check_path_configuration()
@@ -353,13 +355,10 @@ def set_path(configuration_key, menu_prompt, check_path=True):
 
     print(f"{menu_prompt}")
     print(build_menu(menu))
-    action = input('Select Option: ')
+    action = input('Select Option [q]: ')
     validate_action(action, configuration_key)
 
-    if 'o' == action:
-        path_value = input('Enter Full Path: ')
-    else:
-        path_value = menu[action]
+    path_value = set_path_value(action, menu)
 
     if check_path and not bool(os.path.exists(path_value)):
         print(f"{Fore.RED}Path '{path_value}' is INVALID!{Style.RESET_ALL}")
@@ -376,11 +375,12 @@ def update_configuration(configuration_key, menu_prompt):
 
     print(f"{menu_prompt}")
     print(build_menu(menu))
-    action = input('Select Option: ')
+    action = input('Select Option [q]: ')
     validate_action(action, configuration_key)
 
-    path_value = menu[action]
+    path_value = set_path_value(action, menu)
+
     configuration[configuration_key] = path_value
     write_configuration_file(configuration)
 
-run_manager(False)
+run_manager()
