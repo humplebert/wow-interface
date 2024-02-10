@@ -104,6 +104,10 @@ def run_manager(add_space=True):
         set_path('path_output', 'Select path to rClone output directory...', False)
         run_manager()
 
+    if not bool(get_configuration('remote_upload')):
+        update_configuration('remote_upload','Enable remote upload using rclone?')
+        run_manager()
+
     path_wow_root = get_configuration('path_wow_root')
     debug_status = set_debug_status()
 
