@@ -177,6 +177,7 @@ def do_interface_archive(directories, debug_status=True):
 
     if debug_status == False:
         try:
+            #todo: debug why this fails if WTF or Interface folders do not exist
             with tarfile.open(filename, 'w') as archive:
                 for value in directories:
                     if os.path.exists(value):
