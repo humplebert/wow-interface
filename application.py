@@ -53,6 +53,7 @@ menus = {
     },
     'path_output': {
         '1': 'onedrive:Files/Applications/WoW Backups',
+        '2': 'drive:Files/Applications/WoW Backups',
         'o': 'Other (manually define)',
         'q': 'Quit'
     },
