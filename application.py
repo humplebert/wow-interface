@@ -133,7 +133,7 @@ def run_manager():
         case _:
             folders=['WTF']
             if action != '1':
-                folders.append('Interface')
+                folders.append('Interface/Addons')
 
             directories = {}
             directories_failed = {}
