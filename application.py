@@ -1,5 +1,4 @@
-import tarfile, os, re, shutil, json
-import os, time
+import tarfile, os, re, shutil, json, io, sys, time
 from datetime import datetime, timedelta
 from timeit import default_timer as timer
 from colorama import Fore
@@ -169,6 +168,18 @@ def validate_action(action, menu, default='q'):
         print_message_error("Invalid Selection. Zero Tolerance for Errors. Process terminated.")
         quit()
 
+
+def capture_exception_output(e):
+    old_stdout = sys.stdout
+    sys.stdout = new_stdout = io.StringIO()
+
+    print(e)
+
+    output = new_stdout.getvalue()
+    sys.stdout = old_stdout
+
+    return output
+
 def do_interface_archive(directories, debug_status=True):
     path_output = get_configuration('path_output')
     remote_upload = get_configuration('remote_upload')
@@ -192,14 +203,16 @@ def do_interface_archive(directories, debug_status=True):
         if remote_upload == 'Yes':
             try:
                 rclone.copy(filename, path_output)
-            except:
+            except Exception as e:
                 print_message_error("Failed to execute rclone upload.")
+                print_message_error(capture_exception_output(e))
                 run_manager()
 
             try:
                 os.remove(filename)
             except:
                 print_message_error("Failed to delete file: {filename}")
+                print_message_error(capture_exception_output(e))
                 run_manager()
 
     time_end = timer()
